@@ -1,0 +1,8 @@
+streamlit
+langchain>=0.2.0
+chromadb
+openai
+tiktoken
+langsmith
+# Optional: for fallback embeddings
+sentence-transformers 
