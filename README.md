@@ -1,4 +1,4 @@
-# AI Act Tutor
+# AI Act Tutor - Developer Guide
 
 An interactive Streamlit-based educational tool for studying and exploring the European Union AI Act (Regulation 2024/1689) through Retrieval-Augmented Generation (RAG), interactive quizzes, and guided study modules.
 
@@ -6,23 +6,7 @@ An interactive Streamlit-based educational tool for studying and exploring the E
 
 AI Act Tutor is designed to help AI practitioners, lawyers, policy students, and anyone interested in understanding the EU AI Act through an intuitive, AI-powered interface. The application leverages state-of-the-art RAG technology to provide accurate, citation-backed responses about the regulation.
 
-## 🚀 Key Features
-
-### Current Features
-- **Multi-page Streamlit Interface**: Clean, responsive UI with navigation between Chat, Study, and Quiz modules
-- **Modular Architecture**: Well-organized codebase for easy maintenance and extensibility
-- **RAG Pipeline**: LangChain v0.2+ based retrieval system with citation support
-- **Local Vector Storage**: ChromaDB for efficient document retrieval and persistence
-
-### Planned Features
-- **Interactive Chat**: Real-time Q&A with the AI Act using RAG
-- **Guided Study Modules**: Structured learning paths through the regulation
-- **Dynamic Quiz Generation**: LLM-powered multiple-choice questions
-- **Citation Tracking**: Always cite specific articles and sections
-- **LangSmith Integration**: Chain monitoring and optimization
-- **Multi-language Support**: Extensible for other jurisdictions
-
-## 🏗️ Architecture
+## 🏗️ Project Structure
 
 ```
 ai-act-tutor/
@@ -52,155 +36,302 @@ ai-act-tutor/
 - **RAG Framework**: LangChain v0.2+
 - **Vector Database**: ChromaDB (local development)
 - **Embeddings**: OpenAI Embeddings (with HuggingFace fallback)
-- **LLM**: OpenAI GPT models
+- **LLM**: OpenAI GPT models / Groq (optional)
 - **Monitoring**: LangSmith
 - **Document Processing**: RecursiveCharacterTextSplitter
 - **Token Management**: tiktoken
 
-## 📋 Prerequisites
+## 🚀 Local Development Setup
 
+### Prerequisites
 - Python 3.8+
-- OpenAI API key
 - Git
+- OpenAI API key
+- LangSmith API key (optional)
 
-## 🚀 Quick Start
+### Step 1: Clone and Setup Virtual Environment
 
-### 1. Clone the Repository
 ```bash
+# Clone the repository
 git clone https://github.com/onchainlabs1/ai-act.git
 cd ai-act
+
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 ```
 
-### 2. Install Dependencies
+### Step 2: Install Dependencies
+
 ```bash
+# Upgrade pip
+pip install --upgrade pip
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Environment Setup
+### Step 3: Environment Configuration
+
 Create a `.env` file in the root directory:
+
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
-LANGCHAIN_API_KEY=your_langsmith_api_key_here  # Optional
-LANGCHAIN_PROJECT=ai-act-tutor  # Optional
+# Required: OpenAI API Key
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Optional: Groq API Key (for alternative LLM)
+GROQ_API_KEY=gsk-your-groq-api-key-here
+
+# Optional: LangSmith Configuration
+LANGCHAIN_API_KEY=ls-your-langsmith-api-key-here
+LANGCHAIN_PROJECT=ai-act-tutor
+LANGCHAIN_TRACING_V2=true
 ```
 
-### 4. Add Source Documents
-Place the EU AI Act document (PDF or HTML) in the `data/` directory.
+### Step 4: Add Source Documents
 
-### 5. Run the Application
+Place the EU AI Act document (PDF or HTML) in the `data/` directory:
+
 ```bash
+# Example: Copy your document to the data folder
+cp /path/to/your/eu-ai-act.pdf data/
+```
+
+### Step 5: Initialize Vector Store (Optional)
+
+If you want to populate the vector store with documents:
+
+```bash
+# Run the document loader (if implemented)
+python -c "from core.loader import load_eu_ai_act; load_eu_ai_act('data/your-document.pdf')"
+```
+
+### Step 6: Run the Application
+
+```bash
+# Start the Streamlit app
 streamlit run app/main.py
 ```
 
 The application will be available at `http://localhost:8501`
 
-## 📚 Usage Guide
+## ☁️ Deployment to Streamlit Cloud
 
-### Chat Interface
-- Ask questions about the EU AI Act
-- Receive citation-backed responses
-- Explore specific articles and sections
+### Step 1: Prepare Your Repository
 
-### Study Modules
-- Follow guided learning paths
-- Interactive lessons and explanations
-- Progress tracking (future feature)
+Ensure your project is pushed to GitHub with the correct structure:
 
-### Quiz System
-- Test your knowledge with generated questions
-- Multiple-choice format
-- Immediate feedback and explanations
+```bash
+# Verify your project structure
+ls -la
 
-## 🔧 Development
+# Should show: app/, core/, data/, vectorstore/, requirements.txt, etc.
+```
 
-### Project Structure Guidelines
+### Step 2: Create Streamlit Configuration
 
-#### Adding New Features
-1. **App Modules**: Add new pages in `app/` directory
-2. **Core Logic**: Implement business logic in `core/` directory
-3. **Data**: Place new documents in `data/` directory
-4. **Configuration**: Update relevant config files
+Create `.streamlit/config.toml` file:
 
-#### RAG Pipeline Customization
-- Modify `core/rag_chain.py` for chain changes
-- Update `core/loader.py` for document processing
-- Adjust chunking parameters in loader.py
+```toml
+[server]
+headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = false
 
-#### Vector Store Management
-- ChromaDB files are stored in `vectorstore/`
-- Rebuild index by deleting and re-running ingestion
-- Monitor performance with LangSmith
+[browser]
+gatherUsageStats = false
+
+[theme]
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+```
+
+### Step 3: Configure Streamlit Cloud Secrets
+
+In your Streamlit Cloud dashboard:
+
+1. Go to your app settings
+2. Navigate to "Secrets"
+3. Add the following secrets:
+
+```toml
+OPENAI_API_KEY = "sk-your-openai-api-key-here"
+GROQ_API_KEY = "gsk-your-groq-api-key-here"
+LANGCHAIN_API_KEY = "ls-your-langsmith-api-key-here"
+LANGCHAIN_PROJECT = "ai-act-tutor"
+LANGCHAIN_TRACING_V2 = "true"
+```
+
+### Step 4: Deploy
+
+1. Connect your GitHub repository to Streamlit Cloud
+2. Set the entrypoint to: `app/main.py`
+3. Deploy the application
+
+## 🔑 Environment Variables
+
+### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | Your OpenAI API key for embeddings and LLM | `sk-...` |
+
+### Optional Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GROQ_API_KEY` | Alternative LLM provider | `gsk-...` |
+| `LANGCHAIN_API_KEY` | LangSmith API key for monitoring | `ls-...` |
+| `LANGCHAIN_PROJECT` | LangSmith project name | `ai-act-tutor` |
+| `LANGCHAIN_TRACING_V2` | Enable LangSmith tracing | `true` |
+
+## 🔧 Development Tips
+
+### Switching Between LLM Providers
+
+If you implement `/app/settings.py`, you can switch between OpenAI and Groq:
+
+```python
+# In your settings page
+llm_provider = st.selectbox(
+    "Choose LLM Provider:",
+    ["OpenAI", "Groq"],
+    key="llm_provider"
+)
+
+# Update environment variables accordingly
+if llm_provider == "Groq":
+    os.environ["USE_GROQ"] = "true"
+else:
+    os.environ["USE_GROQ"] = "false"
+```
+
+### Security Best Practices
+
+- **Never commit `.env` files** - They are already in `.gitignore`
+- **Use Streamlit Secrets** for production deployments
+- **Rotate API keys** regularly
+- **Monitor usage** through LangSmith
+
+### Performance Optimization
+
+```bash
+# For development, you can limit token usage
+export OPENAI_MAX_TOKENS=1000
+
+# Enable debug logging
+export STREAMLIT_LOG_LEVEL=debug
+```
+
+### Vector Store Management
+
+```bash
+# Clear vector store (if needed)
+rm -rf vectorstore/chroma/*
+
+# Rebuild index
+python -c "from core.loader import load_eu_ai_act; load_eu_ai_act('data/your-document.pdf')"
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**OpenAI API Key Error**
+```bash
+Error: Invalid API key
+```
+**Solution**: Verify your API key in `.env` file and ensure it's valid.
+
+**ChromaDB Connection Error**
+```bash
+Error: Unable to connect to vectorstore
+```
+**Solution**: Ensure `vectorstore/` directory exists and has write permissions.
+
+**Streamlit Port Already in Use**
+```bash
+Error: Port 8501 is already in use
+```
+**Solution**: Use `streamlit run app/main.py --server.port 8502`
+
+**Missing Dependencies**
+```bash
+ModuleNotFoundError: No module named 'langchain'
+```
+**Solution**: Activate virtual environment and run `pip install -r requirements.txt`
+
+### Debug Mode
+
+```bash
+# Enable debug logging
+export STREAMLIT_LOG_LEVEL=debug
+streamlit run app/main.py
+
+# Check environment variables
+python -c "import os; print('OPENAI_API_KEY:', 'SET' if os.getenv('OPENAI_API_KEY') else 'NOT SET')"
+```
+
+## 📊 Monitoring and Analytics
+
+### LangSmith Integration
+
+If you have LangSmith configured:
+
+1. **View Chain Runs**: Monitor RAG chain performance
+2. **Track Token Usage**: Monitor API costs
+3. **Debug Issues**: Trace through chain execution
+4. **Optimize Prompts**: A/B test different prompts
+
+### Local Logging
+
+```python
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+```
+
+## 🤝 Contributing
+
+### Development Workflow
+
+```bash
+# Fork and clone
+git clone https://github.com/your-username/ai-act.git
+cd ai-act
+
+# Create feature branch
+git checkout -b feature/new-feature
+
+# Make changes
+# ... your code changes ...
+
+# Test locally
+streamlit run app/main.py
+
+# Commit and push
+git add .
+git commit -m "Add new feature"
+git push origin feature/new-feature
+
+# Create Pull Request
+```
 
 ### Code Standards
+
 - Follow PEP 8 style guidelines
 - Add type hints where appropriate
 - Include docstrings for all functions
 - Use meaningful variable and function names
-
-### Testing
-```bash
-# Run basic tests (when implemented)
-python -m pytest tests/
-
-# Check code style
-flake8 app/ core/
-```
-
-## 🔒 Security Considerations
-
-- **API Keys**: Never commit `.env` files or hardcode API keys
-- **Document Access**: Ensure proper access controls for sensitive documents
-- **Data Privacy**: Local vector storage for development
-- **Input Validation**: Validate all user inputs
-
-## 📊 Performance Optimization
-
-### Token Efficiency
-- Chunk size: 512 tokens with 64 token overlap
-- Limit context window usage
-- Optimize prompt templates
-- Use streaming responses where appropriate
-
-### Vector Store Optimization
-- Regular index maintenance
-- Monitor retrieval performance
-- Optimize embedding dimensions
-- Consider hybrid search strategies
-
-## 🚀 Deployment
-
-### Local Development
-```bash
-streamlit run app/main.py
-```
-
-### Production Considerations
-- Use production-grade vector database (Pinecone, Weaviate)
-- Implement proper authentication
-- Set up monitoring and logging
-- Configure CORS and security headers
-- Use environment-specific configurations
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Workflow
-```bash
-# Create and switch to feature branch
-git checkout -b feature/new-feature
-
-# Make changes and commit
-git add .
-git commit -m "Add new feature"
-
-# Push to remote
-git push origin feature/new-feature
-```
+- Test your changes locally before pushing
 
 ## 📝 TODO List
 
@@ -224,35 +355,6 @@ git push origin feature/new-feature
 - [ ] Export functionality
 - [ ] Mobile optimization
 - [ ] Integration with other AI regulations
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**OpenAI API Key Error**
-```
-Error: Invalid API key
-```
-Solution: Check your `.env` file and ensure the API key is correct.
-
-**ChromaDB Connection Error**
-```
-Error: Unable to connect to vectorstore
-```
-Solution: Ensure the `vectorstore/` directory exists and has write permissions.
-
-**Streamlit Port Already in Use**
-```
-Error: Port 8501 is already in use
-```
-Solution: Use `streamlit run app/main.py --server.port 8502`
-
-### Debug Mode
-```bash
-# Enable debug logging
-export STREAMLIT_LOG_LEVEL=debug
-streamlit run app/main.py
-```
 
 ## 📄 License
 
